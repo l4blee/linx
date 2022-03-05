@@ -9,7 +9,7 @@ class ButtonLabels:
     FIND_CHATS = '👥Поиск чатов'
     FIND_PEOPLE = '🔎Поиск людей'
     DECLINE = '❌Отмена'
-    BACK = '🏠Домой'
+    HOME = '🏠Домой'
     SUBSCRIPTION = '💳Подписка'
     MY_FORM = '📝Моя анкета'
     SET_AGE = '📅Изменить возраст'
@@ -40,11 +40,15 @@ class Main(Stage):
                '• Вступать в тематические группы\n'
 
     def generate_kb(self):
-        self.kb.add_button(ButtonLabels.FIND_PEOPLE)
-        self.kb.add_button(ButtonLabels.FIND_CHATS)
+        self.kb.add_button(ButtonLabels.FIND_PEOPLE,
+                           payload={'command': 'find_people'})
+        self.kb.add_button(ButtonLabels.FIND_CHATS,
+                           payload={'command': 'find_chats'})
 
         self.kb.add_line()
-        self.kb.add_button(ButtonLabels.SETTINGS, color=VkKeyboardColor.PRIMARY)
+        self.kb.add_button(ButtonLabels.SETTINGS,
+                           color=VkKeyboardColor.PRIMARY,
+                           payload={'command': 'settings'})
 
 
 class Settings(Stage):
@@ -52,14 +56,18 @@ class Settings(Stage):
                'Здесь ты можешь изменить свою личную информацию или проверить статус подписки.'    
 
     def generate_kb(self):
-        self.kb.add_button(ButtonLabels.SET_AGE)
-        self.kb.add_button(ButtonLabels.MY_FORM)
+        self.kb.add_button(ButtonLabels.SET_AGE,
+                           payload={'command': 'set_age'})
+        self.kb.add_button(ButtonLabels.MY_FORM,
+                           payload={'command': 'my_form'})
 
         self.kb.add_line()
         self.kb.add_button(ButtonLabels.SUBSCRIPTION, color=VkKeyboardColor.PRIMARY)
 
         self.kb.add_line()
-        self.kb.add_button(ButtonLabels.BACK, color=VkKeyboardColor.POSITIVE)
+        self.kb.add_button(ButtonLabels.HOME,
+                           color=VkKeyboardColor.POSITIVE,
+                           payload={'command': 'home'})
 
 
 class Stages(Enum):

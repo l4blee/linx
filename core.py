@@ -3,14 +3,15 @@ import asyncio
 import logging
 from datetime import datetime
 from traceback import print_exception
+from json import loads
 
 from vk_api import VkApi
-from vk_api.longpoll import VkLongPoll, VkEventType
+from vk_api.longpoll import VkLongPoll, VkEventType, Event
 from vk_api.keyboard import VkKeyboard
 
 from stages import Stages, ButtonLabels
-from commands import Commands
-from cogs import Cog, Command
+from commands import Navigation
+from cogs import Cog, Command, CommandPool
 
 
 class BotClient(VkApi):
@@ -22,24 +23,24 @@ class BotClient(VkApi):
         self.logger = logging.getLogger(self.__class__.__module__ + '.' + self.__class__.__qualname__)
 
         self.cogs: set = set()
+        self.command_pool: CommandPool = CommandPool()
 
-    def register_cog(self, cog: Cog):
+    def register_cog(self, cog: Cog) -> None:
         self.cogs.add(cog)
-        for cmd in cog.get_commands():
-            for name in cmd.aliases:
-                setattr(self, name, cmd)
+        self.command_pool.register_cog(cog)
     
-    def run(self):
+    def run(self) -> None:
         self.logger.info('Registering cogs...')
-        self.register_cog(Commands(self))
 
-        all_cmds = [i for i in dir(self) if isinstance(getattr(self, i), Command)]
-        self.logger.info(f'Available commands: {all_cmds}')
+        # Registering cogs(manually)
+        self.register_cog(Navigation())
+
+        self.logger.info(f'Available commands: {self.command_pool.to_list()}')
 
         self.logger.info('Starting bot...')
         asyncio.run(self.main())
 
-    async def main(self):
+    async def main(self) -> None:
         # TODO: make it asynchronous with asyncio.gather
         for event in self.longpoll.listen():
             if event.type == VkEventType.MESSAGE_NEW and \
@@ -49,7 +50,7 @@ class BotClient(VkApi):
                 except Exception as e:
                     await self.on_error(e, event)
 
-    async def on_error(self, exception, event):
+    async def on_error(self, exception: Exception, event: Event) -> None:
         await self.send_message(event.user_id,
                                 'Произошла ошибка во время выполнения...',
                                 'MAIN')
@@ -57,9 +58,19 @@ class BotClient(VkApi):
         self.logger.warning(f'Ignoring exception {type(exception)}: {exception}')
         print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
 
-    async def on_message(self, event) -> None:
+    @staticmethod
+    def recv_cmd_from_payload(event: Event):
+        if (payload := event.raw[6].get('payload')):
+            # Since basically payload is represented as an str
+            return loads(payload).get('command')
+
+    async def on_message(self, event: Event) -> None:
         try:
-            cmd = getattr(self, event.text.lower())
+            payload_cmd = self.recv_cmd_from_payload(event)
+            if payload_cmd:
+                cmd = getattr(self.command_pool, payload_cmd)
+            else:
+                cmd = getattr(self.command_pool, event.text)
         except AttributeError:
                 await self.send_message(event.user_id,
                                         'Такой команды нет, попробуйте еще раз!')
@@ -85,5 +96,5 @@ class BotClient(VkApi):
         return int(datetime.now().timestamp() * 1000)
 
     @staticmethod
-    def get_stage(stage):        
+    def get_stage(stage) -> Stages:        
         return Stages[stage].value
