@@ -12,12 +12,13 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(name)s:\t%(message)s',
                     datefmt='%d.%b.%Y %H:%M:%S')
 
-client = MongoDB(
+'''client = MongoDB(
     os.getenv('DATABASE_URL') % {
         'username': os.getenv('DB_USERNAME'),
         'password': os.getenv('DB_PASSWORD')
     }
-)
+)'''
 
-bot = BotClient(client, token=os.getenv('TOKEN'))
+# bot = BotClient(client, token=os.getenv('TOKEN'))
+bot = BotClient('', token=os.getenv('TOKEN'))
 bot.run()
