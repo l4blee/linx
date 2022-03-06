@@ -26,6 +26,7 @@ class Bot(VkApi):
 
     def run(self) -> None:
         self.setup()
+        self.logger.info(f'Registered cogs: {[i.__class__.__name__ for i in self.cogs]}')
         self.logger.info(f'Available commands: {self.command_pool.to_list()}')
 
         self.logger.info('Starting bot...')

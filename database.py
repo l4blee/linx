@@ -30,7 +30,7 @@ class MongoDB:
         self.database = self.client.forms
         self.logger.info('Successfully connected to Mongo, going further.')
 
-    def get_form(self, event: Event) -> User:
+    async def get_form(self, event: Event) -> User:
         """
         Must be called on each reaction message in order to get the next
         user form to be used as the Bot's answer message

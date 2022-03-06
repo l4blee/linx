@@ -1,11 +1,12 @@
 import json
+from importlib import import_module
+from pathlib import Path 
 
 from vk_api.longpoll import Event
 
 from api import Bot
 
 from stages import Stages
-from commands import Navigation
 
 
 class Client(Bot):
@@ -16,7 +17,12 @@ class Client(Bot):
 
     def setup(self) -> None:
         self.logger.info('Registering cogs...')
-        self.register_cog(Navigation())
+
+        for cls in [
+            import_module(f'cogs.{i.stem}').__dict__[i.stem.title()]
+            for i in Path('cogs/').glob('*.py')
+        ]:
+            self.register_cog(eval('cls()'))
 
     @staticmethod
     def parse_cmd(event: Event) -> str:  # Returns payload cmd name

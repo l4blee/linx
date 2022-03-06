@@ -19,5 +19,5 @@ client = MongoDB(
     }
 )
 
-bot = BotClient(client, token=os.getenv('TOKEN'))
+bot = Client(client, token=os.getenv('TOKEN'))
 bot.run()
