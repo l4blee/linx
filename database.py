@@ -4,23 +4,17 @@ import random
 from typing import Protocol
 
 import pymongo
+from vk_api.longpoll import Event
 
 
-# Using protocols to reach work convenience
+# Using protocol to reach work convenience
 class User(Protocol):
     """
-    User representative protocol.
-    Must have 'id' & 'preferences' in DB Document.
+    User DB document representative protocol.
+    Must have 'id' & 'preferences'.
     """
     id: int
-
-
-class Message(Protocol):
-    """
-    Message representative protocol.
-    """
-    id: int
-    user: User
+    preferences: list
 
 
 class MongoDB:
@@ -36,16 +30,14 @@ class MongoDB:
         self.database = self.client.forms
         self.logger.info('Successfully connected to Mongo, going further.')
 
-    def get_form(self, message: Message) -> User:
+    def get_form(self, event: Event) -> User:
         """
         Must be called on each reaction message in order to get the next
         user form to be used as the Bot's answer message
         """
-        user: User = message.user
-
         # Requesting users collection to get user preferences
         user_record = self.database.users.find_one({
-            'id': user.id  # Unique userid for each document required
+            'id': event.user_id
         })
 
         # Getting user's preferences to find other forms

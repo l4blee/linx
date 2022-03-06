@@ -21,10 +21,6 @@ class Stage(ABC):
         self.kb = VkKeyboard()
         self.generate_kb()
 
-    @abstractproperty
-    def msg_text(self):
-        raise NotImplementedError('msg_text attribute must be implemented for Stage clssses.')
-
     @abstractclassmethod
     def generate_kb(self) -> None:
         raise NotImplementedError('generate method must be implemented for Stage clssses.')
@@ -53,7 +49,7 @@ class Main(Stage):
 
 class Settings(Stage):
     msg_text = f'{ButtonLabels.SETTINGS}\n'\
-               'Здесь ты можешь изменить свою личную информацию или проверить статус подписки.'    
+               'Здесь ты можешь изменить свою личную информацию или проверить статус подписки.'
 
     def generate_kb(self):
         self.kb.add_button(ButtonLabels.SET_AGE,
@@ -62,7 +58,9 @@ class Settings(Stage):
                            payload={'command': 'my_form'})
 
         self.kb.add_line()
-        self.kb.add_button(ButtonLabels.SUBSCRIPTION, color=VkKeyboardColor.PRIMARY)
+        self.kb.add_button(ButtonLabels.SUBSCRIPTION,
+                           color=VkKeyboardColor.PRIMARY,
+                           payload={'command': 'subscription'})
 
         self.kb.add_line()
         self.kb.add_button(ButtonLabels.HOME,
