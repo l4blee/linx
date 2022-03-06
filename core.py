@@ -16,7 +16,7 @@ class Client(Bot):
 
     def setup(self) -> None:
         self.logger.info('Registering cogs...')
-        self.register_cog(Navigation())  # Doint it manually, rofl..
+        self.register_cog(Navigation())
 
     @staticmethod
     def parse_cmd(event: Event) -> str:  # Returns payload cmd name
